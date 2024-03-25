@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protocolos Municipais de Encaminhamento</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0rVcRVqZ5cF1hZNICwj8h3qQw0SklmqnG1wA3zUvoE73uOgLeg5ISg2V3c2zN" crossorigin="anonymous">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .btn-specialty {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: none;
+      transition: all 0.3s ease-in-out;
+      text-transform: uppercase;
+    }
+    .btn-specialty i {
+      margin-right: 10px;
+    }
+    .btn-specialty:hover {
+      transform: translateY(-3px);
+    }
+    .cirurgia-geral {
+      color: #222;
+    }
+    .ortopedia {
+      color: #222;
+    }
+    .oftalmologia {
+      color: #222;
+    }
+    .neurologia {
+      color: #222;
+    }
+    .protocol-container {
+      margin-top: 40px;
+    }
+    .pdf-embed {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    h1 {
+      font-size: 28px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="mb-4">Protocolos Municipais de Encaminhamento</h1>
+  <h3 class="text-center" align="center">Bento Gonçalves - RS</h3>
+  <div class="text-center" align="center">
+    <button class="btn btn-specialty cirurgia-geral" onclick="showProtocol('CIRURGIA_GERAL')"><i class="fas fa-user-md"></i> Cirurgia Geral</button>
+    <button class="btn btn-specialty ortopedia" onclick="showProtocol('ORTOPEDIA')"><i class="fas fa-bone"></i> Ortopedia</button>
+    <button class="btn btn-specialty oftalmologia" onclick="showProtocol('OFTALMOLOGIA')"><i class="fas fa-eye"></i> Oftalmologia</button>
+    <button class="btn btn-specialty neurologia" onclick="showProtocol('NEUROLOGIA')"><i class="fas fa-brain"></i> Neurologia</button>
+  </div>
+  <div class="protocol-container mt-5">
+    <div id="protocolContent" class="text-center"></div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-y41EtIUa1cFAzn6j+Y44n4ytXM5YpgF3c1Fr3goPQosk6bzBRb4Sk5LkDovY9BRb" crossorigin="anonymous"></script>
+<!-- Font Awesome -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+<script>
+  // Função para mostrar o protocolo correspondente à especialidade
+  function showProtocol(especialidade) {
+    let protocolContent = document.getElementById('protocolContent');
+    let pdfUrl;
+
+    switch (especialidade) {
+      case 'CIRURGIA_GERAL':
+        pdfUrl = "cg.pdf";
+        break;
+      case 'ORTOPEDIA':
+        pdfUrl = "or.pdf";
+        break;
+      case 'OFTALMOLOGIA':
+        pdfUrl = "of.pdf";
+        break;
+      case 'NEUROLOGIA':
+        pdfUrl = "ne.pdf";
+        break;
+      default:
+        pdfUrl = "";
+    }
+
+    if (pdfUrl !== "") {
+      protocolContent.innerHTML = `<embed src="${pdfUrl}" type="application/pdf" class="pdf-embed">`;
+    } else {
+      protocolContent.innerHTML = "Especialidade não encontrada.";
+    }
+  }
+</script>
+</body>
+</html>
