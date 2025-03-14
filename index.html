@@ -1,114 +1,581 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Protocolos Municipais de Encaminhamento</title>
+  <title>Ortopedia e Traumatologia HMV</title>
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0rVcRVqZ5cF1hZNICwj8h3qQw0SklmqnG1wA3zUvoE73uOgLeg5ISg2V3c2zN" crossorigin="anonymous">
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* Custom CSS */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8f9fa;
+      background-color: #f9f9f9;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .btn-specialty {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      border-radius: 25px;
-      border: none;
-      transition: all 0.3s ease-in-out;
-      text-transform: uppercase;
-    }
-    .btn-specialty i {
-      margin-right: 10px;
-    }
-    .btn-specialty:hover {
-      transform: translateY(-3px);
-    }
-    .cirurgia-geral {
-      color: #222;
-    }
-    .ortopedia {
-      color: #222;
-    }
-    .oftalmologia {
-      color: #222;
-    }
-    .neurologia {
-      color: #222;
-    }
-    .protocol-container {
-      margin-top: 40px;
-    }
-    .pdf-embed {
-      width: 100%;
-      height: 600px;
-      border: none;
-    }
-    h1 {
-      font-size: 28px;
+    /* Cabeçalho clean com título menor */
+    .header-title {
+      background-color: #fff;
+      border-bottom: 1px solid #dee2e6;
+      padding: 10px;
       text-align: center;
+    }
+    .header-title h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+    /* Barra lateral com largura reduzida e responsividade */
+    .sidebar {
+      background-color: #fff;
+      border-right: 1px solid #dee2e6;
+      padding: 10px;
+      max-width: 250px;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        max-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+      }
+    }
+    .main-content {
+      padding: 15px;
+    }
+    /* Estilo para o menu de grupos – utilizando list-group com collapse */
+    .list-group-item.group-item {
+      background-color: #e9ecef;
+      border: none;
+      border-radius: 0.5rem;
+      margin-bottom: 5px;
+    }
+    .list-group-item.group-item button {
+      font-weight: 600;
+      color: #0d6efd;
+      text-align: left;
+    }
+    /* Botões de gerenciamento menores e reposicionados */
+    .management-btns {
+      margin-top: 15px;
+    }
+    .management-btns button {
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+    /* Caixa de texto maior para conteúdos */
+    textarea#textoConteudo {
+      height: 300px;
     }
   </style>
 </head>
 <body>
+  <!-- Cabeçalho -->
+  <header class="header-title">
+    <h1>Ortopedia e Traumatologia HMV</h1>
+  </header>
 
-<div class="container">
-  <h1 class="mb-4">Protocolos Municipais de Encaminhamento</h1>
-  <h3 class="text-center" align="center">Bento Gonçalves - RS</h3>
-  <div class="text-center" align="center">
-    <button class="btn btn-specialty cirurgia-geral" onclick="showProtocol('CIRURGIA_GERAL')"><i class="fas fa-user-md"></i> Cirurgia Geral</button>
-    <button class="btn btn-specialty ortopedia" onclick="showProtocol('ORTOPEDIA')"><i class="fas fa-bone"></i> Ortopedia</button>
-    <button class="btn btn-specialty oftalmologia" onclick="showProtocol('OFTALMOLOGIA')"><i class="fas fa-eye"></i> Oftalmologia</button>
-    <button class="btn btn-specialty neurologia" onclick="showProtocol('NEUROLOGIA')"><i class="fas fa-brain"></i> Neurologia</button>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar: usando list-group para os Grupos -->
+      <nav class="col-md-2 sidebar">
+        <div id="groupsList" class="list-group mb-3">
+          <!-- Grupos e seus tópicos serão carregados aqui -->
+        </div>
+        <div class="management-btns">
+          <button class="btn btn-primary btn-sm w-100" onclick="showManagement('grupo')">Gerenciar Grupos</button>
+          <button class="btn btn-primary btn-sm w-100" onclick="showManagement('topico')">Gerenciar Tópicos</button>
+          <button class="btn btn-primary btn-sm w-100" onclick="showManagement('texto')">Gerenciar Textos</button>
+        </div>
+      </nav>
+      <!-- Conteúdo Principal -->
+      <main class="col-md-10 main-content">
+        <!-- Área de Gerenciamento (Formulários) -->
+        <div id="managementArea">
+          <!-- Formulário de Grupos -->
+          <div id="formGrupo" class="mb-4" style="display: none;">
+            <h4>Gerenciar Grupos</h4>
+            <div class="mb-3">
+              <input type="text" id="grupoNome" class="form-control" placeholder="Nome do Grupo">
+              <input type="hidden" id="grupoId">
+            </div>
+            <button onclick="salvarGrupo()" class="btn btn-primary">Salvar</button>
+            <button onclick="cancelar('grupo')" class="btn btn-secondary">Cancelar</button>
+            <hr>
+            <h5>Lista de Grupos</h5>
+            <ul id="listaGrupos" class="list-group"></ul>
+          </div>
+          <!-- Formulário de Tópicos -->
+          <div id="formTopico" class="mb-4" style="display: none;">
+            <h4>Gerenciar Tópicos</h4>
+            <div class="mb-3">
+              <select id="grupoSelectTopico" class="form-select">
+                <option value="">Selecione um Grupo</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <input type="text" id="topicoNome" class="form-control" placeholder="Nome do Tópico">
+              <input type="hidden" id="topicoId">
+            </div>
+            <button onclick="salvarTopico()" class="btn btn-primary">Salvar</button>
+            <button onclick="cancelar('topico')" class="btn btn-secondary">Cancelar</button>
+            <hr>
+            <h5>Lista de Tópicos</h5>
+            <ul id="listaTopicos" class="list-group"></ul>
+          </div>
+          <!-- Formulário de Textos -->
+          <div id="formTexto" class="mb-4" style="display: none;">
+            <h4>Gerenciar Textos</h4>
+            <div class="mb-3">
+              <select id="topicoSelectTexto" class="form-select">
+                <option value="">Selecione um Tópico</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <input type="text" id="textoTitulo" class="form-control" placeholder="Título do Texto">
+            </div>
+            <div class="mb-3">
+              <textarea id="textoConteudo" class="form-control" placeholder="Conteúdo do Texto"></textarea>
+              <input type="hidden" id="textoId">
+            </div>
+            <button onclick="salvarTexto()" class="btn btn-primary">Salvar</button>
+            <button onclick="cancelar('texto')" class="btn btn-secondary">Cancelar</button>
+            <hr>
+            <h5>Lista de Textos</h5>
+            <ul id="listaTextos" class="list-group"></ul>
+          </div>
+        </div>
+        <!-- Área para Listar Textos do Tópico Selecionado -->
+        <div id="listaTextosArea" style="display: none;">
+          <h4 id="tituloTopicoSelecionado"></h4>
+          <ul id="listaTextosTopic" class="list-group mb-3"></ul>
+          <div id="textoDetalhado" style="display: none;">
+            <button class="btn btn-secondary mb-3" onclick="voltarListaTextos()">Voltar</button>
+            <h4 id="detalheTitulo"></h4>
+            <p id="detalheConteudo"></p>
+          </div>
+        </div>
+        <!-- Mensagem Inicial -->
+        <div id="mensagemPrompt">
+          <p>Selecione um tópico no menu para visualizar os textos.</p>
+        </div>
+      </main>
+    </div>
   </div>
-  <div class="protocol-container mt-5">
-    <div id="protocolContent" class="text-center"></div>
-  </div>
-</div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-y41EtIUa1cFAzn6j+Y44n4ytXM5YpgF3c1Fr3goPQosk6bzBRb4Sk5LkDovY9BRb" crossorigin="anonymous"></script>
-<!-- Font Awesome -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-<script>
-  // Função para mostrar o protocolo correspondente à especialidade
-  function showProtocol(especialidade) {
-    let protocolContent = document.getElementById('protocolContent');
-    let pdfUrl;
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTgGkV34cqhXBM_LnMrVvpA46QLLgWoxM",
+      authDomain: "residencia-e9343.firebaseapp.com",
+      projectId: "residencia-e9343",
+      storageBucket: "residencia-e9343.firebasestorage.app",
+      messagingSenderId: "188049208028",
+      appId: "1:188049208028:web:2368510fbf282758bf3a19"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const gruposRef = db.collection("grupos");
+    const topicosRef = db.collection("topicos");
+    const textosRef = db.collection("textos");
 
-    switch (especialidade) {
-      case 'CIRURGIA_GERAL':
-        pdfUrl = "cg.pdf";
-        break;
-      case 'ORTOPEDIA':
-        pdfUrl = "or.pdf";
-        break;
-      case 'OFTALMOLOGIA':
-        pdfUrl = "of.pdf";
-        break;
-      case 'NEUROLOGIA':
-        pdfUrl = "ne.pdf";
-        break;
-      default:
-        pdfUrl = "";
+    // Variáveis para unsubscribe
+    let unsubscribeSidebar = null;
+    let unsubscribeSidebarTopics = {};
+    let unsubscribeGruposGerenciar = null;
+    let unsubscribeTopicosGerenciar = null;
+    let unsubscribeTextosGerenciar = null;
+
+    // Inicializa o menu de grupos como uma list-group com collapse para os tópicos
+    function initSidebar() {
+      const groupsList = document.getElementById('groupsList');
+      groupsList.innerHTML = '';
+      if (unsubscribeSidebar) unsubscribeSidebar();
+      for (let key in unsubscribeSidebarTopics) {
+        if (unsubscribeSidebarTopics[key]) unsubscribeSidebarTopics[key]();
+      }
+      unsubscribeSidebarTopics = {};
+
+      unsubscribeSidebar = gruposRef.onSnapshot(snapshot => {
+        groupsList.innerHTML = '';
+        snapshot.forEach(grupoDoc => {
+          const grupo = grupoDoc.data();
+          const grupoId = grupoDoc.id;
+          // Cria um item para o grupo com um botão que aciona o collapse dos tópicos
+          const groupItem = document.createElement('div');
+          groupItem.className = 'list-group-item group-item';
+          groupItem.innerHTML = `
+            <button class="btn btn-link text-decoration-none w-100" data-bs-toggle="collapse" data-bs-target="#collapseTopics${grupoId}" aria-expanded="false">
+              ${grupo.nome}
+            </button>
+            <div class="collapse" id="collapseTopics${grupoId}">
+              <ul id="topicsList${grupoId}" class="list-group mt-2"></ul>
+            </div>
+          `;
+          groupsList.appendChild(groupItem);
+          // Configura listener para os tópicos deste grupo
+          unsubscribeSidebarTopics[grupoId] = topicosRef.where('grupoId', '==', grupoId)
+            .onSnapshot(topicosSnap => {
+              const topicsList = document.getElementById(`topicsList${grupoId}`);
+              topicsList.innerHTML = '';
+              topicosSnap.forEach(topicoDoc => {
+                const topico = topicoDoc.data();
+                const topicoId = topicoDoc.id;
+                const topicItem = document.createElement('li');
+                topicItem.className = 'list-group-item list-group-item-action';
+                topicItem.style.cursor = 'pointer';
+                topicItem.innerText = topico.nome;
+                topicItem.onclick = () => listarTextos(topicoId, topico.nome);
+                topicsList.appendChild(topicItem);
+              });
+            });
+        });
+      });
     }
 
-    if (pdfUrl !== "") {
-      protocolContent.innerHTML = `<embed src="${pdfUrl}" type="application/pdf" class="pdf-embed">`;
-    } else {
-      protocolContent.innerHTML = "Especialidade não encontrada.";
+    // Carregar Grupos na área de gerenciamento
+    function carregarGruposGerenciar() {
+      const lista = document.getElementById('listaGrupos');
+      lista.innerHTML = '';
+      if (unsubscribeGruposGerenciar) unsubscribeGruposGerenciar();
+      unsubscribeGruposGerenciar = gruposRef.onSnapshot(snapshot => {
+        lista.innerHTML = '';
+        snapshot.forEach(grupoDoc => {
+          const grupo = grupoDoc.data();
+          const grupoId = grupoDoc.id;
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          li.innerHTML = `
+            ${grupo.nome}
+            <div>
+              <button class="btn btn-sm btn-outline-primary me-2" onclick='editarGrupo(${JSON.stringify(grupoId)}, ${JSON.stringify(grupo.nome)})'>Editar</button>
+              <button class="btn btn-sm btn-outline-danger" onclick='excluirGrupo(${JSON.stringify(grupoId)})'>Excluir</button>
+            </div>
+          `;
+          lista.appendChild(li);
+        });
+      });
     }
-  }
-</script>
+
+    // Carregar Tópicos na área de gerenciamento – exibindo o nome do grupo
+    function carregarTopicosGerenciar() {
+      const lista = document.getElementById('listaTopicos');
+      lista.innerHTML = '';
+      if (unsubscribeTopicosGerenciar) unsubscribeTopicosGerenciar();
+      unsubscribeTopicosGerenciar = topicosRef.onSnapshot(snapshot => {
+        lista.innerHTML = '';
+        snapshot.forEach(topicoDoc => {
+          const topico = topicoDoc.data();
+          const topicoId = topicoDoc.id;
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          // Consulta para obter o nome do grupo
+          gruposRef.doc(topico.grupoId).get().then(groupDoc => {
+            const groupName = groupDoc.exists ? groupDoc.data().nome : "Desconhecido";
+            li.innerHTML = `
+              ${topico.nome} (Grupo: ${groupName})
+              <div>
+                <button class="btn btn-sm btn-outline-primary me-2" onclick='editarTopico(${JSON.stringify(topicoId)}, ${JSON.stringify(topico.nome)}, ${JSON.stringify(topico.grupoId)})'>Editar</button>
+                <button class="btn btn-sm btn-outline-danger" onclick='excluirTopico(${JSON.stringify(topicoId)})'>Excluir</button>
+              </div>
+            `;
+          });
+          lista.appendChild(li);
+        });
+      });
+    }
+
+    // Carregar Textos na área de gerenciamento – exibindo o nome do tópico e do grupo
+    function carregarTextosGerenciar() {
+      const lista = document.getElementById('listaTextos');
+      lista.innerHTML = '';
+      if (unsubscribeTextosGerenciar) unsubscribeTextosGerenciar();
+      unsubscribeTextosGerenciar = textosRef.onSnapshot(snapshot => {
+        lista.innerHTML = '';
+        snapshot.forEach(textoDoc => {
+          const texto = textoDoc.data();
+          const textoId = textoDoc.id;
+          const li = document.createElement('li');
+          li.className = 'list-group-item d-flex justify-content-between align-items-center';
+          // Obter os dados do tópico para nome e, em seguida, do grupo
+          topicosRef.doc(texto.topicoId).get().then(topicDoc => {
+            const topicName = topicDoc.exists ? topicDoc.data().nome : "Desconhecido";
+            const grupoId = topicDoc.exists ? topicDoc.data().grupoId : null;
+            if (grupoId) {
+              gruposRef.doc(grupoId).get().then(groupDoc => {
+                const groupName = groupDoc.exists ? groupDoc.data().nome : "Desconhecido";
+                li.innerHTML = `
+                  ${texto.titulo} (Tópico: ${topicName}, Grupo: ${groupName})
+                  <div>
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick='editarTexto(${JSON.stringify(textoId)}, ${JSON.stringify(texto.titulo)}, ${JSON.stringify(texto.conteudo)}, ${JSON.stringify(texto.topicoId)})'>Editar</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick='excluirTexto(${JSON.stringify(textoId)})'>Excluir</button>
+                  </div>
+                `;
+              });
+            } else {
+              li.innerHTML = `
+                ${texto.titulo} (Tópico: ${topicName})
+                <div>
+                  <button class="btn btn-sm btn-outline-primary me-2" onclick='editarTexto(${JSON.stringify(textoId)}, ${JSON.stringify(texto.titulo)}, ${JSON.stringify(texto.conteudo)}, ${JSON.stringify(texto.topicoId)})'>Editar</button>
+                  <button class="btn btn-sm btn-outline-danger" onclick='excluirTexto(${JSON.stringify(textoId)})'>Excluir</button>
+                </div>
+              `;
+            }
+          });
+          lista.appendChild(li);
+        });
+      });
+    }
+
+    // Carregar Grupos para os selects (consulta única)
+    function carregarGruposSelect(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">Selecione um Grupo</option>';
+      gruposRef.get().then(snapshot => {
+        snapshot.forEach(grupoDoc => {
+          const option = document.createElement('option');
+          option.value = grupoDoc.id;
+          option.text = grupoDoc.data().nome;
+          select.appendChild(option);
+        });
+      });
+    }
+    // Carregar Tópicos para os selects (consulta única)
+    function carregarTopicosSelect(selectId) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '<option value="">Selecione um Tópico</option>';
+      topicosRef.get().then(snapshot => {
+        snapshot.forEach(topicoDoc => {
+          const option = document.createElement('option');
+          option.value = topicoDoc.id;
+          option.text = topicoDoc.data().nome;
+          select.appendChild(option);
+        });
+      });
+    }
+
+    // CRUD de Grupos
+    function salvarGrupo() {
+      const nome = document.getElementById('grupoNome').value.trim();
+      const grupoId = document.getElementById('grupoId').value;
+      if (!nome) {
+        alert("Preencha o nome do grupo!");
+        return;
+      }
+      if (grupoId) {
+        gruposRef.doc(grupoId).update({ nome })
+          .then(() => {
+            limparFormulario('grupo');
+            cancelar('grupo');
+          })
+          .catch(error => console.error("Erro ao editar grupo: ", error));
+      } else {
+        gruposRef.add({ nome })
+          .then(() => {
+            limparFormulario('grupo');
+            cancelar('grupo');
+          })
+          .catch(error => console.error("Erro ao criar grupo: ", error));
+      }
+    }
+    // Excluir grupo somente se não houver tópicos vinculados
+    function excluirGrupo(id) {
+      if (confirm("Tem certeza que deseja excluir este grupo?")) {
+        topicosRef.where("grupoId", "==", id).get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              gruposRef.doc(id).delete().catch(error => console.error("Erro ao excluir grupo: ", error));
+            } else {
+              alert("Não é possível excluir o grupo, pois há tópicos vinculados a ele.");
+            }
+          })
+          .catch(error => console.error("Erro ao verificar tópicos: ", error));
+      }
+    }
+    function editarGrupo(id, nome) {
+      document.getElementById('grupoNome').value = nome;
+      document.getElementById('grupoId').value = id;
+      showManagement('grupo');
+    }
+
+    // CRUD de Tópicos
+    function salvarTopico() {
+      const grupoId = document.getElementById('grupoSelectTopico').value;
+      const nome = document.getElementById('topicoNome').value.trim();
+      const topicoId = document.getElementById('topicoId').value;
+      if (!grupoId || !nome) {
+        alert("Selecione um grupo e preencha o nome do tópico!");
+        return;
+      }
+      if (topicoId) {
+        topicosRef.doc(topicoId).update({ nome, grupoId })
+          .then(() => {
+            limparFormulario('topico');
+            cancelar('topico');
+          })
+          .catch(error => console.error("Erro ao editar tópico: ", error));
+      } else {
+        topicosRef.add({ nome, grupoId })
+          .then(() => {
+            limparFormulario('topico');
+            cancelar('topico');
+          })
+          .catch(error => console.error("Erro ao criar tópico: ", error));
+      }
+    }
+    // Excluir tópico somente se não houver textos vinculados
+    function excluirTopico(id) {
+      if (confirm("Tem certeza que deseja excluir este tópico?")) {
+        textosRef.where("topicoId", "==", id).get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              topicosRef.doc(id).delete().catch(error => console.error("Erro ao excluir tópico: ", error));
+            } else {
+              alert("Não é possível excluir o tópico, pois há textos vinculados a ele.");
+            }
+          })
+          .catch(error => console.error("Erro ao verificar textos: ", error));
+      }
+    }
+    function editarTopico(id, nome, grupoId) {
+      document.getElementById('grupoSelectTopico').value = grupoId;
+      document.getElementById('topicoNome').value = nome;
+      document.getElementById('topicoId').value = id;
+      showManagement('topico');
+    }
+
+    // CRUD de Textos
+    function salvarTexto() {
+      const topicoId = document.getElementById('topicoSelectTexto').value;
+      const titulo = document.getElementById('textoTitulo').value.trim();
+      const conteudo = document.getElementById('textoConteudo').value.trim();
+      const textoId = document.getElementById('textoId').value;
+      if (!topicoId || !titulo || !conteudo) {
+        alert("Selecione um tópico e preencha título e conteúdo do texto!");
+        return;
+      }
+      if (textoId) {
+        textosRef.doc(textoId).update({ titulo, conteudo, topicoId })
+          .then(() => {
+            limparFormulario('texto');
+            cancelar('texto');
+          })
+          .catch(error => console.error("Erro ao editar texto: ", error));
+      } else {
+        textosRef.add({ titulo, conteudo, topicoId })
+          .then(() => {
+            limparFormulario('texto');
+            cancelar('texto');
+          })
+          .catch(error => console.error("Erro ao criar texto: ", error));
+      }
+    }
+    function editarTexto(id, titulo, conteudo, topicoId) {
+      document.getElementById('topicoSelectTexto').value = topicoId;
+      document.getElementById('textoTitulo').value = titulo;
+      document.getElementById('textoConteudo').value = conteudo;
+      document.getElementById('textoId').value = id;
+      showManagement('texto');
+    }
+    function excluirTexto(id) {
+      if (confirm("Tem certeza que deseja excluir este texto?")) {
+        textosRef.doc(id).delete().catch(error => console.error("Erro ao excluir texto: ", error));
+      }
+    }
+
+    // Listar textos de um tópico, exibindo também o grupo relacionado
+    function listarTextos(topicoId, topicoNome) {
+      document.getElementById('managementArea').style.display = 'none';
+      document.getElementById('mensagemPrompt').style.display = 'none';
+      document.getElementById('textoDetalhado').style.display = 'none';
+      document.getElementById('listaTextosArea').style.display = 'block';
+      // Obter dados do tópico para recuperar o nome do grupo
+      topicosRef.doc(topicoId).get().then(doc => {
+        if (doc.exists) {
+          const grupoId = doc.data().grupoId;
+          gruposRef.doc(grupoId).get().then(groupDoc => {
+            let groupName = groupDoc.exists ? groupDoc.data().nome : "";
+            document.getElementById('tituloTopicoSelecionado').innerText = "Textos do Tópico: " + topicoNome + " - Grupo: " + groupName;
+          });
+        }
+      });
+      const lista = document.getElementById('listaTextosTopic');
+      lista.innerHTML = '';
+      textosRef.where('topicoId', '==', topicoId).get().then(snapshot => {
+        if (snapshot.empty) {
+          lista.innerHTML = '<li class="list-group-item">Nenhum texto encontrado para este tópico.</li>';
+        } else {
+          snapshot.forEach(textoDoc => {
+            const texto = textoDoc.data();
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.style.cursor = 'pointer';
+            li.innerText = texto.titulo;
+            li.onclick = () => exibirTextoDetalhado(texto.titulo, texto.conteudo);
+            lista.appendChild(li);
+          });
+        }
+      });
+    }
+    function exibirTextoDetalhado(titulo, conteudo) {
+      document.getElementById('listaTextosTopic').style.display = 'none';
+      const detalhado = document.getElementById('textoDetalhado');
+      detalhado.style.display = 'block';
+      document.getElementById('detalheTitulo').innerText = titulo;
+      document.getElementById('detalheConteudo').innerText = conteudo;
+    }
+    function voltarListaTextos() {
+      document.getElementById('textoDetalhado').style.display = 'none';
+      document.getElementById('listaTextosTopic').style.display = 'block';
+    }
+
+    // Limpar formulários
+    function limparFormulario(tipo) {
+      if (tipo === 'grupo') {
+        document.getElementById('grupoNome').value = "";
+        document.getElementById('grupoId').value = "";
+      } else if (tipo === 'topico') {
+        document.getElementById('topicoNome').value = "";
+        document.getElementById('topicoId').value = "";
+        document.getElementById('grupoSelectTopico').value = "";
+      } else if (tipo === 'texto') {
+        document.getElementById('textoTitulo').value = "";
+        document.getElementById('textoConteudo').value = "";
+        document.getElementById('textoId').value = "";
+        document.getElementById('topicoSelectTexto').value = "";
+      }
+    }
+    function cancelar(tipo) {
+      limparFormulario(tipo);
+      document.getElementById('form' + capitalize(tipo)).style.display = 'none';
+    }
+    function capitalize(s) {
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    // Alterna as áreas de gerenciamento
+    function showManagement(tipo) {
+      document.getElementById('managementArea').style.display = 'block';
+      document.getElementById('listaTextosArea').style.display = 'none';
+      document.getElementById('mensagemPrompt').style.display = 'none';
+      document.getElementById('formGrupo').style.display = 'none';
+      document.getElementById('formTopico').style.display = 'none';
+      document.getElementById('formTexto').style.display = 'none';
+      if (tipo === 'grupo') {
+        document.getElementById('formGrupo').style.display = 'block';
+        carregarGruposGerenciar();
+      } else if (tipo === 'topico') {
+        document.getElementById('formTopico').style.display = 'block';
+        carregarGruposSelect('grupoSelectTopico');
+        carregarTopicosGerenciar();
+      } else if (tipo === 'texto') {
+        document.getElementById('formTexto').style.display = 'block';
+        carregarTopicosSelect('topicoSelectTexto');
+        carregarTextosGerenciar();
+      }
+    }
+    // Inicializa o sistema
+    initSidebar();
+  </script>
 </body>
 </html>
