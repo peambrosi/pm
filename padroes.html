@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Padrões</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="pacientes.html">ORTOPEDIA HMV</a>
+    <button class="navbar-toggler bg-dark border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="index.html">PACIENTES</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cirurgias.html">CIRURGIAS</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="padroes.html">PADRÕES</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="transferencia.html">TRANSFERÊNCIA</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Conteúdo principal -->
+  <div class="container mt-5">
+    <h2>Padrões</h2>
+    <div class="padrao-controls">
+      <select id="padraoSelect" class="form-select padrao-select"></select>
+      <input type="text" id="novoPadraoNome" class="form-control" placeholder="Novo padrão">
+      <button id="criarPadraoBtn" class="btn btn-primary">Criar</button>
+      <button id="excluirPadraoBtn" class="btn btn-danger">Excluir</button>
+    </div>
+    <div class="mb-3">
+      <label for="padraoBox" class="form-label">Texto do Padrão:</label>
+      <textarea id="padraoBox" class="form-control box-area" rows="15" autofocus></textarea>
+      <div class="action-buttons">
+        <button id="salvarBtn" class="btn btn-success">Salvar alterações</button>
+        <button id="copiarBtn" class="btn btn-secondary">Copiar tudo</button>
+      </div>
+      <span id="status" class="text-muted ms-2"></span>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTgGkV34cqhXBM_LnMrVvpA46QLLgWoxM",
+      authDomain: "residencia-e9343.firebaseapp.com",
+      projectId: "residencia-e9343",
+      storageBucket: "residencia-e9343.firebasestorage.app",
+      messagingSenderId: "188049208028",
+      appId: "1:188049208028:web:2368510fbf282758bf3a19"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const colRef = db.collection("padroes");
+
+    let padraoAtual = null;
+    let listaPadroes = [];
+
+    // Carrega padrões e popula select
+    function carregarPadroes() {
+      colRef.orderBy("nome").get().then((querySnapshot) => {
+        listaPadroes = [];
+        const select = document.getElementById("padraoSelect");
+        select.innerHTML = "";
+        querySnapshot.forEach((doc) => {
+          const nome = doc.data().nome;
+          listaPadroes.push(nome);
+          const option = document.createElement("option");
+          option.value = nome;
+          option.textContent = nome;
+          select.appendChild(option);
+        });
+        if (listaPadroes.length > 0) {
+          padraoAtual = select.value = listaPadroes[0];
+          carregarTextoPadrao(padraoAtual);
+        } else {
+          padraoAtual = null;
+          document.getElementById("padraoBox").value = "";
+        }
+      });
+    }
+
+    // Carrega texto do padrão selecionado
+    function carregarTextoPadrao(nome) {
+      colRef.where("nome", "==", nome).limit(1).get().then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          const doc = querySnapshot.docs[0];
+          document.getElementById("padraoBox").value = doc.data().texto || "";
+        } else {
+          document.getElementById("padraoBox").value = "";
+        }
+      });
+    }
+
+    // Criação de padrão
+    document.getElementById("criarPadraoBtn").onclick = function() {
+      const nome = document.getElementById("novoPadraoNome").value.trim();
+      if (!nome) return;
+      colRef.add({ nome, texto: "" }).then(() => {
+        mostrarStatus("Padrão criado");
+        document.getElementById("novoPadraoNome").value = "";
+        carregarPadroes();
+      });
+    };
+
+    // Exclusão de padrão
+    document.getElementById("excluirPadraoBtn").onclick = function() {
+      const nome = document.getElementById("padraoSelect").value;
+      if (!nome) return;
+      colRef.where("nome", "==", nome).get().then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            doc.ref.delete();
+          });
+          mostrarStatus("Padrão excluído");
+          setTimeout(carregarPadroes, 500);
+        }
+      });
+    };
+
+    // Salvar alterações do texto do padrão atual
+    document.getElementById("salvarBtn").onclick = function() {
+      const nome = document.getElementById("padraoSelect").value;
+      const texto = document.getElementById("padraoBox").value;
+      if (!nome) return;
+      colRef.where("nome", "==", nome).limit(1).get().then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          querySnapshot.docs[0].ref.update({ texto }).then(() => {
+            mostrarStatus("Salvo");
+          });
+        }
+      });
+    };
+
+    // Copiar tudo
+    document.getElementById("copiarBtn").onclick = function() {
+      const textarea = document.getElementById("padraoBox");
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      mostrarStatus("Copiado");
+    };
+
+    // Seleção de padrão
+    document.getElementById("padraoSelect").onchange = function() {
+      padraoAtual = this.value;
+      carregarTextoPadrao(padraoAtual);
+      setTimeout(() => {
+        document.getElementById("padraoBox").focus();
+      }, 100);
+    };
+
+    // Mensagem de status rápida
+    function mostrarStatus(msg) {
+      const el = document.getElementById("status");
+      el.textContent = msg;
+      setTimeout(() => { el.textContent = ""; }, 1200);
+    }
+
+    // Inicialização
+    window.onload = function() {
+      carregarPadroes();
+      setTimeout(() => {
+        document.getElementById("padraoBox").focus();
+      }, 500);
+    };
+  </script>
+</body>
+</html>
